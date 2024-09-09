@@ -1,0 +1,68 @@
+
+
+services:
+  quiz-service:
+    build:
+      context: ./service1_quiz
+      dockerfile: Dockerfile
+    ports:
+      - "8021:8021"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=maini
+      - DB_PASSWORD=pratham
+      - DB_NAME=quizdb
+      - DB_PORT=5432
+
+  user-service:
+    build:
+      context: ./service2_user
+      dockerfile: Dockerfile
+    ports:
+      - "8023:8023"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=maini
+      - DB_PASSWORD=pratham
+      - DB_NAME=quizdb
+      - DB_PORT=5432
+
+  test-service:
+    build:
+      context: ./service3_test
+      dockerfile: Dockerfile
+    ports:
+      - "8024:8024"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=maini
+      - DB_PASSWORD=pratham
+      - DB_NAME=quizdb
+      - DB_PORT=5432
+
+  db:
+    image: postgres:15.2
+    environment:
+      POSTGRES_DB: quizdb
+      POSTGRES_USER: maini
+      POSTGRES_PASSWORD: pratham
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "maini", "-d", "quizdb"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+volumes:
+  pgdata:
